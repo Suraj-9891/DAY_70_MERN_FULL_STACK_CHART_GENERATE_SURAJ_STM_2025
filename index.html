@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart Generator Online Tool </title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom Styles */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chartContainer {
+            width: 100%;
+            max-width: 700px;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<header class="bg-blue-600 text-white py-4">
+    <div class="container mx-auto text-center">
+        <h1 class="text-3xl font-bold">Chart Generator Tool with Suraj (STM)</h1>
+        <p>Create customizable charts with ease</p>
+    </div>
+</header>
+
+<main class="container mx-auto my-8 p-4 bg-white rounded-lg shadow-lg">
+    <!-- Chart Selection -->
+    <section>
+        <h2 class="text-xl font-bold mb-4">1. Select Chart Type</h2>
+        <div class="flex space-x-4">
+            <button class="chart-btn bg-blue-500 text-white px-4 py-2 rounded-lg" data-type="bar">Bar</button>
+            <button class="chart-btn bg-green-500 text-white px-4 py-2 rounded-lg" data-type="line">Line</button>
+            <button class="chart-btn bg-purple-500 text-white px-4 py-2 rounded-lg" data-type="pie">Pie</button>
+            <button class="chart-btn bg-red-500 text-white px-4 py-2 rounded-lg" data-type="doughnut">Doughnut</button>
+        </div>
+    </section>
+
+    <!-- Data Input -->
+    <section class="mt-8">
+        <h2 class="text-xl font-bold mb-4">2. Input Data</h2>
+        <table class="w-full border-collapse border border-gray-200">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 px-2 py-1">Label</th>
+                    <th class="border border-gray-300 px-2 py-1">Value</th>
+                    <th class="border border-gray-300 px-2 py-1">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="dataTable">
+                <tr>
+                    <td class="border border-gray-300 px-2 py-1"><input type="text" class="w-full border" placeholder="Label"></td>
+                    <td class="border border-gray-300 px-2 py-1"><input type="number" class="w-full border" placeholder="Value"></td>
+                    <td class="border border-gray-300 px-2 py-1 text-center"><button class="remove-row bg-red-500 text-white px-2 py-1 rounded">Remove</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <button id="addRow" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">Add Row</button>
+    </section>
+
+    <!-- Customization Options -->
+    <section class="mt-8">
+        <h2 class="text-xl font-bold mb-4">3. Customize Chart</h2>
+        <div class="mb-4">
+            <label for="chartTitle" class="block font-semibold">Chart Title</label>
+            <input type="text" id="chartTitle" class="w-full border rounded px-2 py-1" placeholder="Enter chart title">
+        </div>
+    </section>
+
+    <!-- Chart Preview -->
+    <section class="mt-8">
+        <h2 class="text-xl font-bold mb-4">4. Chart Preview</h2>
+        <div id="chartContainer">
+            <canvas id="chartCanvas"></canvas>
+        </div>
+        <button id="downloadChart" class="mt-4 bg-green-500 text-white px-4 py-2 rounded">Download Chart</button>
+    </section>
+</main>
+
+<footer class="bg-gray-800 text-white py-4 mt-8 text-center">
+    <p>&copy; 2025 Chart Generator Tool. Made with Suraj Kumar (STM)</p>
+</footer>
+
+<script>
+    const chartBtns = document.querySelectorAll('.chart-btn');
+    const addRowBtn = document.getElementById('addRow');
+    const dataTable = document.getElementById('dataTable');
+    const chartCanvas = document.getElementById('chartCanvas');
+    const chartTitleInput = document.getElementById('chartTitle');
+    const downloadBtn = document.getElementById('downloadChart');
+
+    let chart;
+    let chartType = 'bar';
+
+    // Add Row
+    addRowBtn.addEventListener('click', () => {
+        const newRow = document.createElement('tr');
+        newRow.innerHTML = `
+            <td class="border border-gray-300 px-2 py-1"><input type="text" class="w-full border" placeholder="Label"></td>
+            <td class="border border-gray-300 px-2 py-1"><input type="number" class="w-full border" placeholder="Value"></td>
+            <td class="border border-gray-300 px-2 py-1 text-center"><button class="remove-row bg-red-500 text-white px-2 py-1 rounded">Remove</button></td>
+        `;
+        dataTable.appendChild(newRow);
+    });
+
+    // Remove Row
+    dataTable.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-row')) {
+            e.target.closest('tr').remove();
+        }
+    });
+
+    // Chart Generation
+    chartBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            chartType = btn.getAttribute('data-type');
+            updateChart();
+        });
+    });
+
+    function updateChart() {
+        const labels = [];
+        const data = [];
+
+        document.querySelectorAll('#dataTable tr').forEach(row => {
+            const label = row.querySelector('input[type="text"]').value;
+            const value = row.querySelector('input[type="number"]').value;
+
+            if (label && value) {
+                labels.push(label);
+                data.push(Number(value));
+            }
+        });
+
+        if (chart) {
+            chart.destroy();
+        }
+
+        chart = new Chart(chartCanvas, {
+            type: chartType,
+            data: {
+                labels,
+                datasets: [{
+                    label: chartTitleInput.value || 'My Chart',
+                    data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    title: {
+                        display: !!chartTitleInput.value,
+                        text: chartTitleInput.value
+                    }
+                }
+            }
+        });
+    }
+
+    // Download Chart
+    downloadBtn.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = 'Suraj(STM).png';
+        link.href = chartCanvas.toDataURL();
+        link.click();
+    });
+</script>
+
+</body>
+</html>
